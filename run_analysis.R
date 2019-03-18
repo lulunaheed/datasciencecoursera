@@ -1,4 +1,5 @@
 run_analysis <- function(){
+   library(dplyr)
  
     setwd("~/Desktop")
     loc<-"./Coursera/UCI HAR Dataset"
@@ -16,7 +17,6 @@ run_analysis <- function(){
     
     subjectTest<-read.table("subject_test.txt",header=FALSE) #Test subject identifiers
     tasks<-read.table("y_test.txt",header=FALSE) #Activity values
-    typeTest<-rep("Test",dim(tasks)[1])
     taskTest<-vector()
     
     for (i in 1:length(tasks[[1]])){
@@ -32,7 +32,7 @@ run_analysis <- function(){
     stdLocs<-grep("[Ss][Tt][Dd]",newcolumnNames1)
     allLocs<-c(meanLocs,stdLocs)
     
-    newdat2<-cbind(subjectTest,typeTest,taskTest,subjectDataTest[,allLocs])
+    newdat2<-cbind(subjectTest,taskTest,subjectDataTest[,allLocs])
   
   ##Gather train data
     
@@ -42,7 +42,6 @@ run_analysis <- function(){
     
     subjectTrain<-read.table("subject_train.txt",header=FALSE) #Train subject identifiers
     taskTrain<-read.table("y_train.txt",header=FALSE) #Activity values
-    typeTrain<-rep("Train",dim(taskTrain)[1])
     
     t<-vector()
   ##Change activity labels from numbers to their corresponding activities as characters
@@ -53,7 +52,7 @@ run_analysis <- function(){
     
     subjectDataTrain<-read.table("X_train.txt",header=FALSE) #Train data values
       
-    n3<-cbind(subjectTrain,typeTrain,t,subjectDataTrain[allLocs])
+    n3<-cbind(subjectTrain,t,subjectDataTrain[allLocs])
     newNames<-t(newcolumnNames1[allLocs])
     
     names(newdat2)<-newNames
@@ -73,18 +72,20 @@ run_analysis <- function(){
        }
     }
   onlySome<-newNames
-   newNames<-cbind("Subject.Number","Type","Activity",newNames)
+   newNames<-cbind("Subject.Number","Activity",newNames)
    names(finaldat)<-newNames
     
 ##Create Dataset with average of each variable for each activity and each subject
     
     #Split Dataset By Activity
-    activities<-finaldat[,3]
+    activities<-finaldat[,2]
     subjects<-finaldat[,1]
-    subjectActivitySplit<-split(finaldat,paste(finaldat[,3],finaldat[,1]))
-    meanSubjectActivity<-as.data.frame(sapply(subjectActivitySplit,function(x) colMeans(x[,onlySome])))
-    bothdf<-list(finaldat,meanSubjectActivity)
+    subjectActivitySplit<-group_by(finaldat,Subject.Number,Activity)
+    meanSubjectActivity<-summarize_all(subjectActivitySplit,funs(mean))
+    
+    write.table(meanSubjectActivity,"meanSubjectActivity.txt",row.names=FALSE)
     
     return(bothdf) #Returns a list containing two dataframes: 1. Merged test and train datasets and 
                    #2.Dataset with the average of each variable for each activity and each subject
+
 }
