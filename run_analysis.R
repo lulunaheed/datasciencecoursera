@@ -83,5 +83,8 @@ run_analysis <- function(){
     subjects<-finaldat[,1]
     subjectActivitySplit<-split(finaldat,paste(finaldat[,3],finaldat[,1]))
     meanSubjectActivity<-as.data.frame(sapply(subjectActivitySplit,function(x) colMeans(x[,onlySome])))
-  
+    bothdf<-list(finaldat,meanSubjectActivity)
+    
+    return(bothdf) #Returns a list containing two dataframes: 1. Merged test and train datase and 
+                   #2.Dataset with the average of each variable for each activity and each subject
 }
