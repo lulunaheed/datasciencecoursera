@@ -1,0 +1,22 @@
+---
+title: "README"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Getting and Cleaning Data Course Project
+
+The function "run_analysis.R" returns two data frames:
+*finaldat
+*meanSubjectActivity
+
+The dataframe, finaldat contains the test and train datasets, and meanSubjectActivity contains the average values for each variable for each activity and each subject.
+
+The finaldat dataframe was created by first reading in the features.txt, activity_labels.txt, subject_test.txt, y_test.txt, X_test.txt, subject_train.txt, y_train.txt, and X_train.txt files provided by the company.
+
+The values in the features.txt file were transposed, and the variables containing the mean and std of the measurements were only retained.  The indices with these specific variables were used to pick up the data values of the test subjects which were contained in the file X_test.txt.  The subject number identifiers were bound to the activity labels and a vector containing information about the group type which was "Test".  This dataframe was then bound to the train dataset (with only the mean and std variable values) which was read from the file X_train.txt. The column names of the final dataframe which had "t"s and "f"s in the beginning were changed to "time" and "FFT freq" respectively.
+
+For the second dataframe, meanSubjectActivity, splits the finaldat dataframe by activity and subject number, and then averages the split groups.

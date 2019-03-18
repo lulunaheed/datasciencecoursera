@@ -45,7 +45,7 @@ run_analysis <- function(){
     typeTrain<-rep("Train",dim(taskTrain)[1])
     
     t<-vector()
-    
+  ##Change activity labels from numbers to their corresponding activities as characters
     for (i in 1:length(taskTrain[[1]])){
       currentVal<-taskTrain[[1]][i]
       t[i]<-as.character(activityLabels[[2]][currentVal])
@@ -85,6 +85,6 @@ run_analysis <- function(){
     meanSubjectActivity<-as.data.frame(sapply(subjectActivitySplit,function(x) colMeans(x[,onlySome])))
     bothdf<-list(finaldat,meanSubjectActivity)
     
-    return(bothdf) #Returns a list containing two dataframes: 1. Merged test and train datase and 
+    return(bothdf) #Returns a list containing two dataframes: 1. Merged test and train datasets and 
                    #2.Dataset with the average of each variable for each activity and each subject
 }
