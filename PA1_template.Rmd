@@ -1,0 +1,91 @@
+---
+Reproducible Research: Course Project 1
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r loading}
+loc <- "/Users/lilafakharzadeh/Desktop/"
+setwd(loc)
+dat<-read.csv("activity.csv",header=TRUE)
+library(ggplot2)
+```
+
+#what is mean total number of steps taken per day?
+
+```{r totalSteps, echo=TRUE}
+#Calculate the total number of steps taken per day
+totalSteps<-aggregate(steps ~ date, dat,FUN=sum)
+#Make a histogram of the total number of steps taken each day
+hist(totalSteps$steps,col='red',main = "Total Number of Steps Taken Each Day", xlab = "Number of Steps")
+```
+
+```{r meanSteps, echo=TRUE}
+#Calculate and report the mean and median of the total number of steps taken per day
+meanSteps<-mean(totalSteps$steps, na.rm=TRUE)
+medSteps<-median(totalSteps$steps, na.rm=TRUE)
+```
+#What is the average daily activity pattern?
+```{r dailyActivity, echo=TRUE}
+#Make a time series plot of the 5-minute interval and the average number of steps taken averaged across all days
+intSteps<-aggregate(steps~interval, dat, mean)
+ggplot(data=intSteps, aes(x=interval, y=steps))+ 
+  geom_line() +
+  ggtitle("Average Daily Activity Pattern")
+  xlab("Interval")
+  ylab("Average number of Steps")
+```
+
+```{r imputeData, echo=TRUE}
+#Which 5-minute interval across all days contain the maximum number of steps
+intMax<- intSteps[which.max(intSteps$steps),]
+
+#Calculate and report the total number of missing values in the dataset
+numNa<-sum(is.na(dat$steps))
+
+#Create a new dataset that is equal to the original dataset but with the missing data filled in
+imputed_dat<- transform(dat, steps= ifelse(is.na(dat$steps),intSteps$steps[match(dat$interval, intSteps$interval)],dat$steps))
+
+#Make a histogram of the total number of steps taken each day and calculate and report the mean and median total number of steps taken per day.  
+imputed_dat_Int<- aggregate(steps ~ date, imputed_dat, FUN=sum)
+hist(imputed_dat_Int$steps, main= "Imputed Number of Steps Each Day", xlab= "Number of Steps")
+
+#Do these values differ from the estimates from the first part of the assignment?
+meanImputedSteps<- mean(imputed_dat_Int$steps, na.rm=TRUE)
+##There was no difference in the mean
+
+medianImputedSteps<- median(imputed_dat_Int$steps, na.rm=TRUE)
+##There was a slight difference between the median values
+
+meanDiff<- meanImputedSteps - meanSteps
+medianDiff<- medianImputedSteps - medSteps
+totalDiff<- sum(imputed_dat_Int$steps) - sum(totalSteps$steps)
+
+#Are there differences in activity patterns between weekdays and weekends?
+
+typeDay<- function(date){
+ dayOfWeek<- weekdays(date)
+ if (dayOfWeek %in% c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')){
+  return ("Weekday")
+  }else 
+  return ("Weekend")
+}
+
+
+imputed_dat$date<- as.Date(imputed_dat$date)
+imputed_dat$dayOfWeek<- sapply(imputed_dat$date, FUN=typeDay)
+
+meanStepsDay<-aggregate(steps~interval + dayOfWeek, imputed_dat, mean)
+ggplot(data=meanStepsDay, aes(x=interval,y=steps)) +
+  geom_line()+
+  facet_grid(dayOfWeek ~ .) +
+  xlab("Interval") +
+  ylab("Average Number of Steps") +
+  theme(plot.title= element_text(hjust=0.5))
+
+```
